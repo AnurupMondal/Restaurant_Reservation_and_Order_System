@@ -1,17 +1,22 @@
 package com.restaurant;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
- * Entry point for the Restaurant Reservation
+ * The Main class serves as the entry point for the Restaurant Reservation
  * and Order System command-line application.
  *
- * <p>This application allows users to create dine-in reservations, place
- * takeaway orders (with no fixed reservation time), and place food orders.</p>
- *
- * @author Anurup Chandra Mondal
+ * <p>This application allows users to create dine-in reservations,
+ * place takeaway orders (with no fixed reservation time), view reservations,
+ * and view orders. It also displays a restaurant menu from which orders can be placed.</p>
  */
 public class Main {
+
+    private static List<Reservation> reservations = new ArrayList<>();
+    private static List<Order> orders = new ArrayList<>();
+    private static List<MenuItem> menuItems = new ArrayList<>();
 
     /**
      * The main method starts the application and provides a command-line interface.
@@ -19,6 +24,7 @@ public class Main {
      * @param args Command-line arguments (not used).
      */
     public static void main(String[] args) {
+        initializeMenuItems();
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
 
@@ -27,7 +33,9 @@ public class Main {
             System.out.println("Restaurant Reservation and Order System");
             System.out.println("1. Create Reservation/Order");
             System.out.println("2. Place Order");
-            System.out.println("3. Exit");
+            System.out.println("3. View Reservations");
+            System.out.println("4. View Orders");
+            System.out.println("5. Exit");
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine();
@@ -39,6 +47,12 @@ public class Main {
                     placeOrder(scanner);
                     break;
                 case "3":
+                    viewReservations();
+                    break;
+                case "4":
+                    viewOrders();
+                    break;
+                case "5":
                     exit = true;
                     System.out.println("Exiting system. Thank you!");
                     break;
@@ -47,6 +61,17 @@ public class Main {
             }
         }
         scanner.close();
+    }
+
+    /**
+     * Initializes the restaurant menu items.
+     */
+    private static void initializeMenuItems() {
+        menuItems.add(new MenuItem("1", "Burger", 5.99, "Classic beef burger with lettuce and tomato"));
+        menuItems.add(new MenuItem("2", "Pizza", 8.99, "Cheese pizza with tomato sauce"));
+        menuItems.add(new MenuItem("3", "Pasta", 7.49, "Pasta in creamy alfredo sauce"));
+        menuItems.add(new MenuItem("4", "Salad", 4.99, "Fresh garden salad with vinaigrette dressing"));
+        menuItems.add(new MenuItem("5", "Soda", 1.99, "Chilled carbonated drink"));
     }
 
     /**
@@ -79,15 +104,15 @@ public class Main {
             return;
         }
 
+        Reservation reservation = null;
         switch (resType) {
             case "1": // Dine-In Reservation
                 System.out.print("Enter Reservation Time (e.g., 7:00 PM): ");
                 String reservationTime = scanner.nextLine();
                 System.out.print("Enter Table Number: ");
                 int tableNumber = Integer.parseInt(scanner.nextLine());
-                Reservation dineIn = new DineInReservation(
+                reservation = new DineInReservation(
                         reservationId, customerName, numberOfGuests, reservationTime, tableNumber);
-                dineIn.confirmReservation();
                 break;
             case "2": // Takeaway Order
                 // For takeaway orders, no need for a reservation time.
@@ -95,50 +120,118 @@ public class Main {
                 String defaultTime = "Anytime";
                 System.out.print("Enter Pickup Location: ");
                 String pickupLocation = scanner.nextLine();
-                Reservation takeaway = new TakeawayReservation(
+                reservation = new TakeawayReservation(
                         reservationId, customerName, numberOfGuests, defaultTime, pickupLocation);
-                takeaway.confirmReservation();
                 break;
             default:
                 System.out.println("Invalid reservation type selected.");
+                return;
         }
+        reservation.confirmReservation();
+        reservations.add(reservation);
     }
 
     /**
-     * Processes a food order by accepting multiple order items.
+     * Processes a food order by displaying the restaurant menu and accepting multiple order items.
+     * <p>
+     * The order ID is automatically generated.
+     * </p>
      *
      * @param scanner The Scanner object used for user input.
      */
     private static void placeOrder(Scanner scanner) {
-        System.out.print("Enter Order ID: ");
-        String orderId = scanner.nextLine();
+        // Order ID is automatically generated; no need to prompt for it.
         System.out.print("Enter Customer Name: ");
         String customerName = scanner.nextLine();
-        Order order = new Order(orderId, customerName);
+        Order order = new Order(customerName);
 
         boolean addMore = true;
         while (addMore) {
-            try {
-                System.out.print("Enter Item Name: ");
-                String itemName = scanner.nextLine();
-                System.out.print("Enter Quantity: ");
-                int quantity = Integer.parseInt(scanner.nextLine());
-                System.out.print("Enter Price per Item: ");
-                double price = Double.parseDouble(scanner.nextLine());
-
-                OrderItem item = new OrderItem(itemName, quantity, price);
-                order.addItem(item);
-
-                System.out.print("Add another item? (yes/no): ");
-                String response = scanner.nextLine();
-                if (!response.equalsIgnoreCase("yes")) {
-                    addMore = false;
+            System.out.println("\n=== Restaurant Menu ===");
+            for (MenuItem item : menuItems) {
+                System.out.println(item.toString());
+            }
+            System.out.print("Enter Menu Item ID to order: ");
+            String menuItemId = scanner.nextLine();
+            MenuItem selectedItem = null;
+            for (MenuItem item : menuItems) {
+                if (item.getId().equals(menuItemId)) {
+                    selectedItem = item;
+                    break;
                 }
+            }
+            if (selectedItem == null) {
+                System.out.println("Invalid Menu Item ID. Please try again.");
+                continue;
+            }
+            System.out.print("Enter Quantity: ");
+            int quantity = 0;
+            try {
+                quantity = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
-                System.out.println("Error: Invalid number format. " + e.getMessage());
+                System.out.println("Error: Invalid number format for quantity. " + e.getMessage());
+                continue;
+            }
+
+            OrderItem orderItem = new OrderItem(selectedItem.getName(), quantity, selectedItem.getPrice());
+            order.addItem(orderItem);
+
+            System.out.print("Add another item? (yes/no): ");
+            String response = scanner.nextLine();
+            if (!response.equalsIgnoreCase("yes")) {
+                addMore = false;
             }
         }
         System.out.println("Order placed successfully!");
         order.displayOrder();
+        orders.add(order);
+    }
+
+    /**
+     * Displays all the reservations made.
+     */
+    private static void viewReservations() {
+        if (reservations.isEmpty()) {
+            System.out.println("No reservations found.");
+        } else {
+            System.out.println("\n=== Reservations List ===");
+            for (Reservation res : reservations) {
+                if (res instanceof DineInReservation) {
+                    DineInReservation dineIn = (DineInReservation) res;
+                    System.out.println("Dine-In Reservation - ID: " + dineIn.getReservationId()
+                            + ", Customer: " + dineIn.getCustomerName()
+                            + ", Guests: " + dineIn.getNumberOfGuests()
+                            + ", Time: " + dineIn.getReservationTime()
+                            + ", Table: " + dineIn.getTableNumber());
+                } else if (res instanceof TakeawayReservation) {
+                    TakeawayReservation takeaway = (TakeawayReservation) res;
+                    System.out.println("Takeaway Order - ID: " + takeaway.getReservationId()
+                            + ", Customer: " + takeaway.getCustomerName()
+                            + ", Guests: " + takeaway.getNumberOfGuests()
+                            + ", Pickup Location: " + takeaway.getPickupLocation());
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * Displays all the orders placed.
+     */
+    private static void viewOrders() {
+        if (orders.isEmpty()) {
+            System.out.println("No orders found.");
+        } else {
+            System.out.println("\n=== Orders List ===");
+            for (Order order : orders) {
+                System.out.println("Order ID: " + order.getOrderId()
+                        + ", Customer: " + order.getCustomerName());
+                for (OrderItem item : order.getItems()) {
+                    System.out.println("  " + item.getItemName() + " x " + item.getQuantity()
+                            + " @ $" + item.getPrice() + " each");
+                }
+                System.out.println();
+            }
+        }
     }
 }
