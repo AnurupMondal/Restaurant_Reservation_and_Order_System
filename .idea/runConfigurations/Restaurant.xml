@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Restaurant" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.restaurant.Main" />
+    <module name="Restaurant_Reservation_and_Order_System" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
