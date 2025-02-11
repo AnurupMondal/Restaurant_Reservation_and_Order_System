@@ -7,18 +7,19 @@ import java.util.List;
  * Represents a customer order containing multiple order items.
  */
 public class Order {
+    private static int orderCounter = 1;
+
     private String orderId;
     private String customerName;
     private List<OrderItem> items;
 
     /**
-     * Constructs a new Order.
+     * Constructs a new Order with an automatically generated order ID.
      *
-     * @param orderId      The unique identifier for the order.
      * @param customerName The name of the customer.
      */
-    public Order(String orderId, String customerName) {
-        this.orderId = orderId;
+    public Order(String customerName) {
+        this.orderId = "ORD" + orderCounter++;
         this.customerName = customerName;
         this.items = new ArrayList<>();
     }
