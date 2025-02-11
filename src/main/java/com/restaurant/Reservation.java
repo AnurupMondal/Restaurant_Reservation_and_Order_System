@@ -3,42 +3,30 @@ package com.restaurant;
 public abstract class Reservation{
     private String reservationId;
     private String customerName;
-    private int numberOfPeople;
-    private String reervationTime;
+    private int numberOfGuests;
+    private String reservationTime;
 
-    public Reservation(String reservationId, String customerName, int numberOfPeople, String reervationTime) {
+    public Reservation(String reservationId, String customerName, int numberOfGuests, String reservationTime) {
         this.reservationId = reservationId;
         this.customerName = customerName;
-        this.numberOfPeople = numberOfPeople;
-        this.reervationTime = reervationTime;
+        this.numberOfGuests = numberOfGuests;
+        this.reservationTime = reservationTime;
     }
 
     public String getReservationId() {
         return reservationId;
     }
 
-    public void setReservationId(String reservationId) {
-        this.reservationId = reservationId;
-    }
-
     public String getCustomerName() {
         return customerName;
     }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-    public int getNumberOfPeople() {
-        return numberOfPeople;
-    }
-
-    public void setNumberOfPeople(int numberOfPeople) {
-        this.numberOfPeople = numberOfPeople;
+    public int getNumberOfGuests(){
+        return numberOfGuests;
     }
 
     public String getReservationTime() {
-        return reervationTime;
+        return reservationTime;
     }
 
     public abstract void confirmReservation();
